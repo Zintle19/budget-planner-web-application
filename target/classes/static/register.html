@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Register | Budget Planner</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: url('assets/savings-bg.jpg.png') no-repeat center center fixed;
+      background-size: cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .container {
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 450px;
+      width: 90%;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      animation: fadeSlide 1s ease-in-out;
+      color: #1e1e1e;
+      text-align: center;
+    }
+
+    h2 {
+      color: #ffffff;
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: #ffffff;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 65%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 10px;
+      border: 2px solid #ffffff;
+      background-color: rgba(255, 255, 255, 0.85);
+      font-size: 16px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #f39c12;
+    }
+
+    .checkbox-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  font-size: 14px;
+  color: #fff;
+  width: 65%; /* 👈 Match the input field width */
+  margin: 5px auto 10px auto; /* centers it and adds spacing */
+}
+
+    .checkbox-container input {
+      margin-right: 8px;
+    }
+
+    .strength {
+      font-size: 14px;
+      color: #f5f5f5;
+      margin-bottom: 10px;
+      text-align: left;
+    }
+
+    button {
+      background: #f39c12;
+      color: white;
+      font-weight: bold;
+      border: none;
+      padding: 12px;
+      width: 40%;
+      border-radius: 8px;
+      margin-top: 15px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #d68910;
+    }
+
+    a {
+      display: block;
+      margin-top: 15px;
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    @keyframes fadeSlide {
+      from {
+        transform: translateY(-30px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Create Your Budget Account</h2>
+    <p>Plan better, save smarter. Register now.</p>
+    <form method="POST" action="/register">
+      <input type="text" name="fullname" placeholder="Full Name" required />
+      <input type="text" name="username" placeholder="Username" required />
+
+      <input type="password" id="password" name="password" placeholder="Create Password" required oninput="checkStrength()" />
+      
+      <div class="checkbox-container">
+        <input type="checkbox" id="showPassword" onclick="togglePassword()" />
+        <label for="showPassword">Show Password</label>
+      </div>
+
+      <div class="strength" id="strengthText"></div>
+
+      <button type="submit">Register</button>
+    </form>
+    <a href="login.html">Already have an account? Login</a>
+  </div>
+
+  <script>
+    function togglePassword() {
+      const pass = document.getElementById("password");
+      pass.type = pass.type === "password" ? "text" : "password";
+    }
+
+    function checkStrength() {
+      const val = document.getElementById("password").value;
+      const strength = document.getElementById("strengthText");
+      if (val.length < 6) {
+        strength.textContent = "Password too short";
+        strength.style.color = "red";
+      } else if (!/[A-Z]/.test(val) || !/[0-9]/.test(val)) {
+        strength.textContent = "Add uppercase letters and numbers";
+        strength.style.color = "orange";
+      } else {
+        strength.textContent = "Strong password ✅";
+        strength.style.color = "#2ecc71";
+      }
+    }
+  </script>
+</body>
+</html>
