@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard | Budget Planner</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+  <style id="themeStyle">
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: linear-gradient(to right, #f8f9fa, #e0eafc);
+      color: #333;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      grid-template-rows: auto 1fr;
+      height: 100vh;
+    }
+
+    .sidebar {
+      grid-row: 1 / span 2;
+      background: #1f1f2e;
+      color: #fff;
+      padding: 30px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .sidebar h2 {
+      font-size: 22px;
+      margin-bottom: 20px;
+      color: #fbc531;
+    }
+
+    .sidebar button {
+      background: #333;
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.3s;
+    }
+
+    .sidebar button:hover {
+      background: #5758bb;
+    }
+
+    .header {
+      background: #fff;
+      padding: 20px 30px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      color: #2c3e50;
+    }
+
+    .header p {
+      font-size: 16px;
+      color: #555;
+    }
+
+    .content {
+      padding: 30px;
+      overflow-y: auto;
+    }
+
+    .section {
+      display: none;
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      height: calc(100vh - 120px);
+      overflow-y: auto;
+    }
+
+    canvas {
+      width: 100% !important;
+      height: 280px !important;
+    }
+
+    input, select {
+      padding: 10px;
+      margin: 10px 0;
+      width: 100%;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    label { display: block; margin-top: 10px; }
+    button.save-btn {
+      background: #27ae60;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      margin-top: 15px;
+      cursor: pointer;
+    }
+    .chart-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: 30px 0;
+}
+
+canvas {
+  width: 500px !important;
+  height: 500px !important;
+  background: #fff;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <div class="sidebar">
+      <h2>💰 Budget Planner</h2>
+      <button onclick="showSection('add')">➕ Add Budget</button>
+      <button onclick="showSection('goals')">🎯 Set Goals</button>
+      <button onclick="showSection('report')">📊 View Report</button>
+      <button onclick="showSection('history')">🕓 View History</button>
+      <button onclick="showSection('categories')">🧩 Manage Categories</button>
+      <button onclick="showSection('settings')">⚙️ Settings</button>
+      <button onclick="window.location.href='login.html'">🚪 Logout</button>
+    </div>
+
+    <div class="header">
+      <h1 id="greeting">Welcome!</h1>
+      <p id="monthYear">June 2025</p>
+    </div>
+
+    <div class="content">
+      <div class="section" id="add">
+        <h2>Add Budget</h2>
+        <label>Amount</label>
+        <input type="number" id="budgetAmount">
+        <label>Category</label>
+        <input type="text" id="budgetCategory">
+        <label>Date</label>
+        <input type="date" id="budgetDate">
+        <button class="save-btn" onclick="saveBudget()">Save Budget</button>
+      </div>
+
+      <div class="section" id="goals">
+        <h2>Set Financial Goals</h2>
+        <label>Goal Description</label>
+        <input type="text" id="goalDesc">
+        <label>Target Amount</label>
+        <input type="number" id="goalAmount">
+        <button class="save-btn" onclick="saveGoal()">Save Goal</button>
+      </div>
+
+      <div class="section" id="report">
+  <h2>Monthly Report</h2>
+  <div class="chart-container">
+    <canvas id="budgetPieChart"></canvas>
+  </div>
+  </div>
+
+      <div class="section" id="history">
+        <h2>View History</h2>
+        <pre id="historyData">Loading...</pre>
+      </div>
+
+      <div class="section" id="categories">
+        <h2>Manage Categories</h2>
+        <label>New Category</label>
+        <input type="text" id="newCategory">
+        <button class="save-btn" onclick="addCategory()">Add Category</button>
+        <ul id="categoryList"></ul>
+      </div>
+
+      <div class="section" id="settings">
+        <h2>Settings</h2>
+        <label>Name</label>
+        <input type="text" id="settingName">
+        <label>Password</label>
+        <input type="password" id="settingPassword">
+        <label>Currency</label>
+        <select id="settingCurrency"><option>ZAR</option><option>USD</option></select>
+        <label>Theme</label>
+        <select id="settingTheme" onchange="toggleTheme()"><option value="light">Light</option><option value="dark">Dark</option></select>
+        <label>Notifications</label>
+        <select id="settingNotify"><option>Enabled</option><option>Disabled</option></select>
+        <button class="save-btn" onclick="saveSettings()">Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // Section navigation logic
+  function showSection(id) {
+    document.querySelectorAll('.section').forEach(section => {
+      section.style.display = 'none';
+    });
+    document.getElementById(id).style.display = 'block';
+  }
+
+  // Show greeting
+  const params = new URLSearchParams(window.location.search);
+  const fullName = params.get("name") || "User";
+  const firstName = fullName.split(" ")[0];
+  document.getElementById("greeting").textContent = `Welcome ${firstName}!`;
+
+  // Month and year display
+  const now = new Date();
+  const monthYear = now.toLocaleString('default', { month: 'long', year: 'numeric' });
+  document.getElementById("monthYear").textContent = monthYear;
+
+  // Budget saving
+  const budgets = [];
+  function saveBudget() {
+    const amount = document.getElementById('budgetAmount').value;
+    const category = document.getElementById('budgetCategory').value;
+    const date = document.getElementById('budgetDate').value;
+    if (!amount || !category || !date) return alert("Fill all fields");
+
+    budgets.push({ amount: parseFloat(amount), category, date, timestamp: new Date().toLocaleString() });
+    alert("Budget saved!");
+    document.getElementById('budgetAmount').value = '';
+    document.getElementById('budgetCategory').value = '';
+    document.getElementById('budgetDate').value = '';
+  }
+
+  // Show report only if budgets exist
+  function renderReport() {
+    if (budgets.length === 0) {
+      alert("No budget data available. Please add a budget first.");
+      return;
+    }
+    showSection('report');
+
+    const ctx = document.getElementById('budgetPieChart').getContext('2d');
+    const data = {};
+    budgets.forEach(b => {
+      data[b.category] = (data[b.category] || 0) + b.amount;
+    });
+
+    new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: Object.keys(data),
+        datasets: [{
+          label: 'Budget Breakdown',
+          data: Object.values(data),
+          backgroundColor: ['#f39c12', '#2ecc71', '#3498db', '#9b59b6', '#e74c3c'],
+        }]
+      }
+    });
+  }
+
+  // History
+  function renderHistory() {
+    if (budgets.length === 0) {
+      document.getElementById("historyData").textContent = "No history yet.";
+    } else {
+      const historyText = budgets.map(b =>
+        `${b.timestamp} | ${b.category} | R${b.amount} | Date: ${b.date}`
+      ).join('\n');
+      document.getElementById("historyData").textContent = historyText;
+    }
+  }
+
+  // Set goals
+  const goals = [];
+  function saveGoal() {
+    const desc = document.getElementById('goalDesc').value;
+    const amount = document.getElementById('goalAmount').value;
+    if (!desc || !amount) return alert("Please fill in all fields.");
+    goals.push({ desc, amount });
+    alert("Goal saved!");
+    document.getElementById('goalDesc').value = '';
+    document.getElementById('goalAmount').value = '';
+  }
+
+  // Manage categories
+  const categoryList = [];
+  function addCategory() {
+    const cat = document.getElementById('newCategory').value;
+    if (!cat) return;
+    categoryList.push(cat);
+    updateCategoryList();
+    document.getElementById('newCategory').value = '';
+  }
+
+  function updateCategoryList() {
+    const listEl = document.getElementById('categoryList');
+    listEl.innerHTML = '';
+    categoryList.forEach((cat, i) => {
+      const li = document.createElement('li');
+      li.textContent = cat;
+      li.style.margin = "10px 0";
+      const btn = document.createElement('button');
+      btn.textContent = "Remove";
+      btn.style.marginLeft = "10px";
+      btn.onclick = () => {
+        categoryList.splice(i, 1);
+        updateCategoryList();
+      };
+      li.appendChild(btn);
+      listEl.appendChild(li);
+    });
+  }
+
+  // Theme toggle
+  function toggleTheme() {
+    const theme = document.getElementById('settingTheme').value;
+    const style = document.getElementById('themeStyle');
+    if (theme === 'dark') {
+      style.innerHTML += `
+        body {
+          background: linear-gradient(to right, #121212, #2c3e50);
+          color: #eee;
+        }
+        .header, .content .section {
+          background: #1e1e1e;
+          color: #eee;
+        }
+        input, select {
+          background: #333;
+          color: #fff;
+          border-color: #666;
+        }
+      `;
+    } else {
+      location.reload(); // resets to default light theme
+    }
+  }
+
+  // Hook buttons that need extra logic
+  document.querySelector('button[onclick="showSection(\'report\')"]').addEventListener('click', renderReport);
+  document.querySelector('button[onclick="showSection(\'history\')"]').addEventListener('click', renderHistory);
+</script>
+
+
+</body>
+</html>
